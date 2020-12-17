@@ -23,10 +23,17 @@ def extract_first_digit(num, base):
 
 
 def benford(base):
-    benford_digits = []
-    for digit in x:
+    benford_digits = [0]
+    for digit in srange(1, base):
         benford_digits.append(math.log(1+1/(digit), base))
     return benford_digits
+
+
+def calculate_deviation(data, benford_law):
+    norm_difference = []
+    for i in range(1, len(data)):
+        norm_difference.append((benford_law[i] - data[i]) ^ 2)
+    return sum(norm_difference) / (base-1)
 
 
 def algorithmDist4(n, trials, base):
@@ -49,20 +56,22 @@ def algorithmDist4(n, trials, base):
 
 
 base = 10
-trials = 100
-for i in range(1, 9):
-    first_digits_frequency = algorithmDist4(i, trials, base)
-    plt = Graphics()
-    plt += list_plot(first_digits_frequency, color='red').plot()
-    plt += plot(log(1+1/(x), base), (x, 1, base))
+trials = 1000000
+benford_law = benford(base)
+#for i in range(1, 9):
+#    first_digits_frequency = algorithmDist4(i, trials, base)
+#    plt = Graphics()
+#    plt += list_plot(first_digits_frequency, color='red').plot()
+#    plt += plot(log(1+1/(x), base), (x, 1, base))
     #plt.axes_labels(['First Digits in Base ' + str(base), 'First Digit Percent'])
     #plt.title('Distribution: ' + i + ', Trials: ' + trials)
-    plt.save('Histogram' + str(i) + '.png')
+#    plt.save('Histogram' + str(i) + '.png')
+#    print("Iteration: " + str(i) + "\tMean Squared Error: " +
+#          str(calculate_deviation(first_digits_frequency, benford_law)))
 
-print(variance(benford()))
-
-#first_digits_frequency = algorithmDist4(1, 100000, base)
-#plt = Graphics()
-#plt += list_plot(first_digits_frequency).plot()
-#plt += plot(log(1+1/(x), base), (x, 1, base))
-#plt.save('Histogram' + str(i) + '.png')
+first_digits_frequency = algorithmDist4(1, trials, base)
+plt = Graphics()
+plt += list_plot(first_digits_frequency).plot()
+plt += plot(log(1+1/(x), base), (x, 1, base))
+plt.save('Histogram' + str(1) + '.png')
+print("Iteration: " + str(1) + "\tMean Squared Error: " + str(calculate_deviation(first_digits_frequency, benford_law)))
