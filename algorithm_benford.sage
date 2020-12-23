@@ -36,6 +36,14 @@ def calculate_deviation(data, benford_law):
     return sum(norm_difference) / (base-1)
 
 
+def calculate_sigmas(trials, base):
+    benford_values = benford(base)
+    sigmas = []
+    for value in benford_values:
+        sigmas.append(sqrt(trials * value * (1 - value)))
+    return sigmas
+
+
 def algorithmDist4(n, trials, base):
     sample = []
     first_digits = []
@@ -50,28 +58,49 @@ def algorithmDist4(n, trials, base):
     first_digits_frequency = [0 for i in srange(base)]
     for number in sample:
         first_digits_frequency[extract_first_digit(number, base)] += 1
-    for i in srange(len(first_digits_frequency)):
-        first_digits_frequency[i] /= trials
+    # for i in srange(len(first_digits_frequency)):
+    #    first_digits_frequency[i] /= trials
     return first_digits_frequency
 
 
-base = 10
-trials = 1000000
-benford_law = benford(base)
-#for i in range(1, 9):
-#    first_digits_frequency = algorithmDist4(i, trials, base)
-#    plt = Graphics()
-#    plt += list_plot(first_digits_frequency, color='red').plot()
-#    plt += plot(log(1+1/(x), base), (x, 1, base))
-    #plt.axes_labels(['First Digits in Base ' + str(base), 'First Digit Percent'])
-    #plt.title('Distribution: ' + i + ', Trials: ' + trials)
-#    plt.save('Histogram' + str(i) + '.png')
-#    print("Iteration: " + str(i) + "\tMean Squared Error: " +
-#          str(calculate_deviation(first_digits_frequency, benford_law)))
+def benford_function(x, base):
+    return log(1+1/(x), base)
 
-first_digits_frequency = algorithmDist4(1, trials, base)
-plt = Graphics()
-plt += list_plot(first_digits_frequency).plot()
-plt += plot(log(1+1/(x), base), (x, 1, base))
-plt.save('Histogram' + str(1) + '.png')
-print("Iteration: " + str(1) + "\tMean Squared Error: " + str(calculate_deviation(first_digits_frequency, benford_law)))
+
+def sigma_function(x, trials, base):
+    return sqrt(trials * benford_function(x, base) * (1 - benford_function(x, base)))
+
+
+base = 10
+trials = 100
+sigmas = calculate_sigmas(trials, base)
+benford_law = benford(base)
+for i in range(1, 7):
+    first_digits_frequency = algorithmDist4(i, trials, base)
+    plt = Graphics()
+    plt += list_plot(first_digits_frequency, color='red').plot()
+    #plt += plot(log(1+1/(x), base), (x, 1, base))
+    plt += plot(trials * benford_function(x, base) - 3 *
+                sigma_function(x, trials, base), (x, 1, base), color='purple')
+    plt += plot(trials * benford_function(x, base) + 3 *
+                sigma_function(x, trials, base), (x, 1, base), color='purple')
+    plt += plot(trials * benford_function(x, base) - 6 *
+                sigma_function(x, trials, base), (x, 1, base), color='green')
+    plt += plot(trials * benford_function(x, base) + 6 *
+                sigma_function(x, trials, base), (x, 1, base), color='green')
+    plt.save('Histogram' + str(i) + '.png')
+    print("Iteration: " + str(i) + "\tMean Squared Error: " +
+          str(calculate_deviation(first_digits_frequency, benford_law)))
+
+#iteration = 1
+#first_digits_frequency = algorithmDist4(iteration, trials, base)
+#plt = Graphics()
+#plt += list_plot(first_digits_frequency).plot()
+##plt += plot(log(1+1/(x), base), (x, 1, base))
+#plt += plot(trials * benford_function(x, base) - 3 * sigma_function(x, trials, base), (x, 1, base), color='purple')
+#plt += plot(trials * benford_function(x, base) + 3 * sigma_function(x, trials, base), (x, 1, base), color='purple')
+#plt += plot(trials * benford_function(x, base) - 6 * sigma_function(x, trials, base), (x, 1, base), color='green')
+#plt += plot(trials * benford_function(x, base) + 6 * sigma_function(x, trials, base), (x, 1, base), color='green')
+#plt.save('Histogram' + str(iteration) + '.png')
+# print("Iteration: " + str(1) + "\tMean Squared Error: " +
+#      str(calculate_deviation(first_digits_frequency, benford_law)))
